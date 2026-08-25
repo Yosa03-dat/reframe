@@ -3,10 +3,13 @@ import ast
 import re
 import os
 import numpy as np
+import ftfy
 
 def clean_text(text):
     if pd.isna(text):
         return ""
+    # Fix mojibake and encoding artifacts
+    text = ftfy.fix_text(text)
     # Convert to lowercase
     text = text.lower()
     # Remove URLs
@@ -114,11 +117,12 @@ def process_datasets(raw_dir, processed_dir):
                     
                     # Add to generator dataset if toxic and has responses
                     if is_toxic and len(responses) > 0:
-                        generator_data.append({
-                            'toxic_text': cleaned_line,
-                            'responses': responses, # Keeping as list for flexibility
-                            'source': ds_name
-                        })
+                        for response in responses:
+                            generator_data.append({
+                                'toxic_text': f"Generate a constructive intervention for: {cleaned_line}",
+                                'response': response,
+                                'source': ds_name
+                            })
                         
         except Exception as e:
             print(f"Error processing {ds_name}: {e}")
