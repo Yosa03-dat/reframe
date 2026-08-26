@@ -17,8 +17,8 @@ class ToxicityClassifier(nn.Module):
         # We manually define the loss function to account for our class imbalance
         # Weight for class 0 (non-toxic) = 1.0
         # Weight for class 1 (toxic) = 1.76
-        weights = torch.tensor([1.0, positive_weight])
-        self.loss_fct = nn.CrossEntropyLoss(weight=weights)
+        # Register weights as a buffer so they automatically move to GPU with .to(device)
+        self.register_buffer('class_weights', torch.tensor([1.0, positive_weight]))
 
     def forward(self, input_ids, attention_mask, labels=None):
         outputs = self.model(
@@ -30,7 +30,8 @@ class ToxicityClassifier(nn.Module):
         loss = None
         
         if labels is not None:
-            # Apply our custom weighted loss function
-            loss = self.loss_fct(logits.view(-1, self.model.config.num_labels), labels.view(-1))
+            # Use registered buffer (already on the correct device)
+            loss_fct = nn.CrossEntropyLoss(weight=self.class_weights)
+            loss = loss_fct(logits.view(-1, self.model.config.num_labels), labels.view(-1))
             
         return {"loss": loss, "logits": logits} if loss is not None else {"logits": logits}

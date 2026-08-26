@@ -38,3 +38,38 @@ cd backend
 python src/data/preprocess.py
 ```
 This will output `classifier_dataset.csv` and `generator_dataset.csv` into `backend/data/processed/`.
+
+## Model Training
+
+To train the Toxicity Classifier (DistilRoBERTa) and Intervention Generator (FLAN-T5) models, run the following scripts:
+
+```bash
+# Train the Classifier
+python src/training/train_classifier.py
+
+# Train the Generator
+python src/training/train_generator.py
+```
+*Note: The best models are saved in the `backend/results/classifier/best_model` and `backend/results/generator/best_model` directories respectively. These directories are ignored by Git.*
+
+## Running the API
+
+Once the models are trained, you can run the highly optimized FastAPI inference server. The API pipeline dynamically loads the models using PyTorch FP16 precision on the GPU for sub-100ms response times.
+
+```bash
+# From the backend directory
+uvicorn api.main:app --host 0.0.0.0 --port 8000
+```
+
+Once running, navigate to [http://localhost:8000/docs](http://localhost:8000/docs) in your browser to explore the interactive API Swagger UI.
+
+**Example Request:**
+```bash
+curl -X 'POST' \
+  'http://localhost:8000/analyze' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "text": "Your argument is completely idiotic."
+}'
+```

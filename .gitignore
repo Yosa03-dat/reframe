@@ -21,3 +21,6 @@ backend/data/processed/*
 # OS generated files
 .DS_Store
 Thumbs.db
+
+# Models
+backend/results/

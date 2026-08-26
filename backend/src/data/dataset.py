@@ -4,8 +4,14 @@ import pandas as pd
 
 class ToxicityClassifierDataset(Dataset):
     """Dataset for the Stage 1 Classifier model (e.g. DistilRoBERTa)."""
-    def __init__(self, csv_file, tokenizer, max_length=128):
-        self.data = pd.read_csv(csv_file)
+    def __init__(self, csv_file=None, tokenizer=None, max_length=128, *, dataframe=None):
+        """Accepts either a csv_file path (positional) or a pre-split dataframe (keyword-only)."""
+        if dataframe is not None:
+            self.data = dataframe.reset_index(drop=True)
+        elif csv_file is not None:
+            self.data = pd.read_csv(csv_file)
+        else:
+            raise ValueError("Must provide either csv_file or dataframe")
         self.tokenizer = tokenizer
         self.max_length = max_length
 
@@ -34,8 +40,14 @@ class ToxicityClassifierDataset(Dataset):
 
 class InterventionGeneratorDataset(Dataset):
     """Dataset for the Stage 2 Generator model (e.g. FLAN-T5)."""
-    def __init__(self, csv_file, tokenizer, max_source_length=128, max_target_length=48):
-        self.data = pd.read_csv(csv_file)
+    def __init__(self, csv_file=None, tokenizer=None, max_source_length=128, max_target_length=48, *, dataframe=None):
+        """Accepts either a csv_file path (positional) or a pre-split dataframe (keyword-only)."""
+        if dataframe is not None:
+            self.data = dataframe.reset_index(drop=True)
+        elif csv_file is not None:
+            self.data = pd.read_csv(csv_file)
+        else:
+            raise ValueError("Must provide either csv_file or dataframe")
         # Drop rows where toxic text or response is missing
         self.data = self.data.dropna(subset=['toxic_text', 'response'])
         self.tokenizer = tokenizer
