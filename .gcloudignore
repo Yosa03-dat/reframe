@@ -1,0 +1,16 @@
+.git
+.gitignore
+venv/
+__pycache__/
+*.py[cod]
+.vscode/
+.idea/
+
+# Ignore datasets and notebooks
+data/
+*.csv
+*.ipynb
+
+# Ignore ALL intermediate training checkpoints (Crucial!)
+results/classifier/checkpoint-*
+results/generator/checkpoint-*
